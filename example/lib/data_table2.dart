@@ -64,6 +64,7 @@ class _DataTable2DemoState extends State<DataTable2Demo> {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: DataTable2(
+        showCheckboxColumn: false,
         columnSpacing: 12,
         horizontalMargin: 12,
         border: TableBorder(

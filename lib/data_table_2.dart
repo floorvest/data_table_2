@@ -50,16 +50,16 @@ class DataRow2 extends DataRow {
   /// Creates the configuration for a row of a [DataTable2].
   ///
   /// The [cells] argument must not be null.
-  const DataRow2(
-      {LocalKey? key,
-      bool selected = false,
-      ValueChanged<bool?>? onSelectChanged,
-      MaterialStateProperty<Color?>? color,
-      required List<DataCell> cells,
-      this.onTap,
-      this.onSecondaryTap,
-      this.onSecondaryTapDown})
-      : super(
+  const DataRow2({
+    LocalKey? key,
+    bool selected = false,
+    ValueChanged<bool?>? onSelectChanged,
+    MaterialStateProperty<Color?>? color,
+    required List<DataCell> cells,
+    this.onTap,
+    this.onSecondaryTap,
+    this.onSecondaryTapDown,
+  }) : super(
             key: key,
             selected: selected,
             onSelectChanged: onSelectChanged,
@@ -126,6 +126,7 @@ class DataTable2 extends DataTable {
     this.border,
     this.smRatio = 0.67,
     this.lmRatio = 1.2,
+    this.customTableStyle,
     required List<DataRow> rows,
   }) : super(
             key: key,
@@ -188,6 +189,8 @@ class DataTable2 extends DataTable {
   /// and lots of columns (that get messed with little space)
   // TODO: Add test
   final double? minWidth;
+
+  final TextStyle? customTableStyle;
 
   /// If set the table will have empty space added after the the last row and allow scroll the
   /// core of the table higher (e.g. if you would like to have iOS navigation UI at the bottom overlapping the table and
@@ -388,6 +391,33 @@ class DataTable2 extends DataTable {
     return label;
   }
 
+  Size _textSize(String text, TextStyle style) {
+    final TextPainter textPainter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        maxLines: 1,
+        textDirection: TextDirection.ltr)
+      ..layout(minWidth: 0, maxWidth: double.infinity);
+    return textPainter.size;
+  }
+
+  _getRowsWidth(List<DataRow> currentRows, int cellIndex, double minWidth,
+      TextStyle style) {
+    double maxWidth = minWidth;
+
+    currentRows.forEach((element) {
+      if (element.cells[cellIndex].child is Text) {
+        var text = element.cells[cellIndex].child as Text;
+        var r = _textSize(text.data.toString(), style);
+
+        if (r.width > maxWidth) {
+          maxWidth = r.width;
+        }
+      }
+    });
+
+    return maxWidth;
+  }
+
   @override
   Widget build(BuildContext context) {
     var sw = Stopwatch();
@@ -427,6 +457,9 @@ class DataTable2 extends DataTable {
         columnSpacing ?? theme.dataTableTheme.columnSpacing ?? _columnSpacing;
 
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>.filled(
+        columns.length + (displayCheckboxColumn ? 1 : 0),
+        const _NullTableColumnWidth());
+    final List<TableColumnWidth> tableColumns2 = List<TableColumnWidth>.filled(
         columns.length + (displayCheckboxColumn ? 1 : 0),
         const _NullTableColumnWidth());
 
@@ -529,7 +562,7 @@ class DataTable2 extends DataTable {
       // full margins are added to side column widths when no check box column is
       // present, half-margin added to first data column width is check box column
       // is present and full margin added to the right
-      availableWidth -= checkBoxWidth;
+      // availableWidth -= checkBoxWidth;
       var totalColWidth = availableWidth -
           effectiveHorizontalMargin -
           (displayCheckboxColumn
@@ -537,46 +570,57 @@ class DataTable2 extends DataTable {
               : effectiveHorizontalMargin);
 
       var columnWidth = totalColWidth / columns.length;
-      var totalWidth = 0.0;
+      // var totalWidth = 0.0;
+      bool rowsExist = false;
+      int length = columns.length;
 
-      var widths = List<double>.generate(columns.length, (i) {
+      if (rows.length > 0) {
+        rowsExist = true;
+        length = rows[0].cells.length;
+      }
+
+      var widths = List<double>.generate(length, (i) {
         var w = columnWidth;
-        var column = columns[i];
-        if (column is DataColumn2) {
-          if (column.size == ColumnSize.S) {
-            w *= smRatio;
-          } else if (column.size == ColumnSize.L) {
-            w *= lmRatio;
-          }
+        if (rowsExist) {
+          w = _getRowsWidth(
+              rows, i, columnWidth, customTableStyle ?? TextStyle());
         }
-        totalWidth += w;
+        // var column = columns[i];
+        // if (column is DataColumn2) {
+        //   if (column.size == ColumnSize.S) {
+        //     w *= smRatio;
+        //   } else if (column.size == ColumnSize.L) {
+        //     w *= lmRatio;
+        //   }
+        // }
+        // totalWidth += w;
         return w;
       });
 
-      var ratio = totalColWidth / totalWidth;
+      // var ratio = totalColWidth / totalWidth;
 
-      for (var i = 0; i < widths.length; i++) {
-        widths[i] *= ratio;
-      }
+      // for (var i = 0; i < widths.length; i++) {
+      //   widths[i] *= ratio;
+      // }
 
-      if (widths.length == 1) {
-        widths[0] = math.max(
-            0,
-            widths[0] +
-                effectiveHorizontalMargin +
-                (displayCheckboxColumn
-                    ? effectiveHorizontalMargin / 2
-                    : effectiveHorizontalMargin));
-      } else if (widths.length > 1) {
-        widths[0] = math.max(
-            0,
-            widths[0] +
-                (displayCheckboxColumn
-                    ? effectiveHorizontalMargin / 2
-                    : effectiveHorizontalMargin));
-        widths[widths.length - 1] =
-            math.max(0, widths[widths.length - 1] + effectiveHorizontalMargin);
-      }
+      // if (widths.length == 1) {
+      //   widths[0] = math.max(
+      //       0,
+      //       widths[0] +
+      //           effectiveHorizontalMargin +
+      //           (displayCheckboxColumn
+      //               ? effectiveHorizontalMargin / 2
+      //               : effectiveHorizontalMargin));
+      // } else if (widths.length > 1) {
+      //   widths[0] = math.max(
+      //       0,
+      //       widths[0] +
+      //           (displayCheckboxColumn
+      //               ? effectiveHorizontalMargin / 2
+      //               : effectiveHorizontalMargin));
+      //   widths[widths.length - 1] =
+      //       math.max(0, widths[widths.length - 1] + effectiveHorizontalMargin);
+      // }
 
       for (int dataColumnIndex = 0;
           dataColumnIndex < columns.length;
@@ -606,6 +650,7 @@ class DataTable2 extends DataTable {
 
         tableColumns[displayColumnIndex] =
             FixedColumnWidth(widths[dataColumnIndex]);
+        tableColumns2[displayColumnIndex] = IntrinsicColumnWidth();
 
         headingRow.children![displayColumnIndex] = _buildHeadingCell(
           context: context,
@@ -648,6 +693,7 @@ class DataTable2 extends DataTable {
       }
 
       var widthsAsMap = tableColumns.asMap();
+      var widthColums = tableColumns2.asMap();
 
       TableBorder? headingBorder;
       TableBorder? dataRowsBorder;
@@ -687,22 +733,32 @@ class DataTable2 extends DataTable {
               children: [headingRow],
               border: headingBorder),
           Flexible(
-              fit: FlexFit.loose,
-              child: tableRows.isEmpty
-                  ? empty ?? SizedBox()
-                  : SingleChildScrollView(
-                      child: marginedTable, controller: scrollController))
+            fit: FlexFit.loose,
+            child: tableRows.isEmpty
+                ? empty ?? SizedBox()
+                : SingleChildScrollView(
+                    child: marginedTable,
+                    controller: scrollController,
+                  ),
+          )
         ],
       );
 
-      var w = Container(
+      var w = ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: constraints.minWidth,
+        ),
+        child: Container(
           decoration: decoration ?? theme.dataTableTheme.decoration,
           child: Material(
-              type: MaterialType.transparency,
-              child: availableWidth > constraints.maxWidth
-                  ? SingleChildScrollView(
-                      scrollDirection: Axis.horizontal, child: t)
-                  : t));
+            type: MaterialType.transparency,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: t,
+            ),
+          ),
+        ),
+      );
 
       return w;
     });
