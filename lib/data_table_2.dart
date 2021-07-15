@@ -417,9 +417,20 @@ class DataTable2 extends DataTable {
     return renderParagraph.size;
   }
 
-  _getRowsWidth(List<DataRow> currentRows, int cellIndex, double minWidth,
-      TextStyle style) {
+  _getRowsWidth(List<DataColumn> currentColumns, List<DataRow> currentRows,
+      int cellIndex, double minWidth, TextStyle style) {
     double maxWidth = minWidth;
+
+    currentColumns.forEach((element) {
+      if (element.label is Text) {
+        var text = element.label as Text;
+        var r = _textSize(text.data.toString(), style);
+
+        if (r.width > maxWidth) {
+          maxWidth = r.width + 80;
+        }
+      }
+    });
 
     currentRows.forEach((element) {
       if (element.cells[cellIndex].child is Text) {
@@ -600,7 +611,7 @@ class DataTable2 extends DataTable {
         var w = columnWidth;
         if (rowsExist) {
           w = _getRowsWidth(
-              rows, i, columnWidth, customTableStyle ?? TextStyle());
+              columns, rows, i, columnWidth, customTableStyle ?? TextStyle());
         }
         // var column = columns[i];
         // if (column is DataColumn2) {
