@@ -43,10 +43,10 @@ class DataColumn2 extends DataColumn {
 @immutable
 class DataCell2 extends DataCell {
   DataCell2(
-    Widget child,
+    Widget child, {
     this.onTap,
     this.fixWidth,
-  ) : super(child, onTap: onTap);
+  }) : super(child, onTap: onTap);
 
   final double? fixWidth;
 
