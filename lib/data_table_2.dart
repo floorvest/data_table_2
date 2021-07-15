@@ -426,7 +426,7 @@ class DataTable2 extends DataTable {
         var text = element.label as Text;
         var r = _textSize(text.data.toString(), style);
 
-        if (r.width > maxWidth) {
+        if (r.width + 80 > maxWidth) {
           maxWidth = r.width + 80;
         }
       }
@@ -437,7 +437,7 @@ class DataTable2 extends DataTable {
         var text = element.cells[cellIndex].child as Text;
         var r = _textSize(text.data.toString(), style);
 
-        if (r.width > maxWidth) {
+        if (r.width + 80 > maxWidth) {
           maxWidth = r.width + 80;
         }
       }
