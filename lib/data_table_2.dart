@@ -40,6 +40,19 @@ class DataColumn2 extends DataColumn {
   final ColumnSize size;
 }
 
+@immutable
+class DataCell2 extends DataCell {
+  DataCell2(
+    Widget child,
+    this.onTap,
+    this.fixWidth,
+  ) : super(child, onTap: onTap);
+
+  final double? fixWidth;
+
+  final VoidCallback? onTap;
+}
+
 /// Extension of standard [DataRow], adds row level tap events. Also there're
 /// onSecondaryTap and onSecondaryTapDown which are not available in DataCells and
 /// which can be useful in Desktop settings when a reaction to the right click is required.
@@ -439,6 +452,14 @@ class DataTable2 extends DataTable {
 
         if (r.width + 80 > maxWidth) {
           maxWidth = r.width + 80;
+        }
+      }
+
+      if (element.cells[cellIndex] is DataCell2) {
+        var t = element.cells[cellIndex] as DataCell2;
+
+        if (t.fixWidth != null) {
+          maxWidth = t.fixWidth ?? maxWidth;
         }
       }
     });
