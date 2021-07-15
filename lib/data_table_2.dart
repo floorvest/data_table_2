@@ -392,12 +392,29 @@ class DataTable2 extends DataTable {
   }
 
   Size _textSize(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-        text: TextSpan(text: text, style: style),
-        maxLines: 1,
-        textDirection: TextDirection.ltr)
-      ..layout(minWidth: 0, maxWidth: double.infinity);
-    return textPainter.size;
+    final constraints = BoxConstraints(
+      maxWidth: double.infinity, // maxwidth calculated
+      minHeight: 0.0,
+      minWidth: 0.0,
+    );
+
+    final RenderParagraph renderParagraph = RenderParagraph(
+      TextSpan(
+        text: text,
+        style: style,
+      ),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    );
+
+    renderParagraph.layout(constraints);
+
+    // final TextPainter textPainter = TextPainter(
+    //     text: TextSpan(text: text, style: style),
+    //     maxLines: 1,
+    //     textDirection: TextDirection.ltr)
+    //   ..layout(minWidth: 0, maxWidth: double.infinity);
+    return renderParagraph.size;
   }
 
   _getRowsWidth(List<DataRow> currentRows, int cellIndex, double minWidth,
@@ -410,7 +427,7 @@ class DataTable2 extends DataTable {
         var r = _textSize(text.data.toString(), style);
 
         if (r.width > maxWidth) {
-          maxWidth = r.width;
+          maxWidth = r.width + 40;
         }
       }
     });
