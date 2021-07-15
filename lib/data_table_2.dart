@@ -618,7 +618,7 @@ class DataTable2 extends DataTable {
               ? effectiveHorizontalMargin / 2
               : effectiveHorizontalMargin);
 
-      var columnWidth = totalColWidth;
+      var columnWidth = totalColWidth / columns.length;
       // var totalWidth = 0.0;
       bool rowsExist = false;
       int length = columns.length;
