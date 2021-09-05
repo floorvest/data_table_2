@@ -630,10 +630,10 @@ class DataTable2 extends DataTable {
 
       var widths = List<double>.generate(length, (i) {
         var w = columnWidth;
-        if (rowsExist) {
-          w = _getRowsWidth(
-              columns, rows, i, columnWidth, customTableStyle ?? TextStyle());
-        }
+        // if (rowsExist) {
+        w = _getRowsWidth(
+            columns, rows, i, columnWidth, customTableStyle ?? TextStyle());
+        // }
         // var column = columns[i];
         // if (column is DataColumn2) {
         //   if (column.size == ColumnSize.S) {
