@@ -444,12 +444,8 @@ class DataTable2 extends DataTable {
 
     var element = currentColumns;
 
-    if (rowEmpty) {
-      if (element is DataColumn2) {
-        if (!element.emptyWidth.isNaN) {
-          maxWidth = element.emptyWidth;
-        }
-      }
+    if (rowEmpty && element is DataColumn2 && !element.emptyWidth.isNaN) {
+      maxWidth = element.emptyWidth;
     } else {
       if (element.label is Text) {
         var text = element.label as Text;
