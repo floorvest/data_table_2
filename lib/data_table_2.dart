@@ -32,14 +32,14 @@ class DataColumn2 extends DataColumn {
       String? tooltip,
       bool numeric = false,
       Function(int, bool)? onSort,
-      this.emptyWidth,
+      this.emptyWidth = double.nan,
       this.size = ColumnSize.M})
       : super(label: label, tooltip: tooltip, numeric: numeric, onSort: onSort);
 
   /// Column sizes are determined based on available width by distributing it
   /// to individual columns accounting for their relative sizes (see [ColumnSize])
   final ColumnSize size;
-  final double? emptyWidth;
+  final double emptyWidth;
 }
 
 @immutable
@@ -432,7 +432,7 @@ class DataTable2 extends DataTable {
     return renderParagraph.size;
   }
 
-  _getRowsWidth(List<DataColumn> currentColumns, List<DataRow> currentRows,
+  _getRowsWidth(DataColumn currentColumns, List<DataRow> currentRows,
       int cellIndex, double minWidth, TextStyle style) {
     double maxWidth = minWidth;
 
@@ -442,22 +442,24 @@ class DataTable2 extends DataTable {
       rowEmpty = true;
     }
 
-    currentColumns.forEach((element) {
-      if (rowEmpty) {
-        if (element is DataColumn2 && element.emptyWidth != null) {
-          maxWidth = element.emptyWidth ?? maxWidth;
-        }
-      } else {
-        if (element.label is Text) {
-          var text = element.label as Text;
-          var r = _textSize(text.data.toString(), style);
+    var element = currentColumns;
 
-          if (r.width > maxWidth) {
-            maxWidth = r.width + 40;
-          }
+    if (rowEmpty) {
+      if (element is DataColumn2) {
+        if (!element.emptyWidth.isNaN) {
+          maxWidth = element.emptyWidth;
         }
       }
-    });
+    } else {
+      if (element.label is Text) {
+        var text = element.label as Text;
+        var r = _textSize(text.data.toString(), style);
+
+        if (r.width > maxWidth) {
+          maxWidth = r.width + 40;
+        }
+      }
+    }
 
     currentRows.forEach((element) {
       if (element.cells[cellIndex].child is Text) {
@@ -645,15 +647,16 @@ class DataTable2 extends DataTable {
       var widths = List<double>.generate(length, (i) {
         var w = columnWidth;
 
+        DataColumn column = columns[i];
+
         if (!rowsExist) {
-          DataColumn column = columns[i];
-          if (column is DataColumn2 && column.emptyWidth != null) {
-            w = column.emptyWidth ?? w;
+          if (column is DataColumn2) {
+            if (!column.emptyWidth.isNaN) w = column.emptyWidth;
           }
         }
 
         // if (rowsExist) {
-        w = _getRowsWidth(columns, rows, i, w, customTableStyle ?? TextStyle());
+        w = _getRowsWidth(column, rows, i, w, customTableStyle ?? TextStyle());
         // }
         // var column = columns[i];
         // if (column is DataColumn2) {
