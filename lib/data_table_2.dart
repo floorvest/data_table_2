@@ -32,12 +32,14 @@ class DataColumn2 extends DataColumn {
       String? tooltip,
       bool numeric = false,
       Function(int, bool)? onSort,
+      this.emptyWidth,
       this.size = ColumnSize.M})
       : super(label: label, tooltip: tooltip, numeric: numeric, onSort: onSort);
 
   /// Column sizes are determined based on available width by distributing it
   /// to individual columns accounting for their relative sizes (see [ColumnSize])
   final ColumnSize size;
+  final double? emptyWidth;
 }
 
 @immutable
@@ -434,13 +436,23 @@ class DataTable2 extends DataTable {
       int cellIndex, double minWidth, TextStyle style) {
     double maxWidth = minWidth;
 
-    currentColumns.forEach((element) {
-      if (element.label is Text) {
-        var text = element.label as Text;
-        var r = _textSize(text.data.toString(), style);
+    bool rowEmpty = false;
 
-        if (r.width > maxWidth) {
-          maxWidth = r.width + 40;
+    if (currentRows.length == 0) {
+      rowEmpty = true;
+    }
+
+    currentColumns.forEach((element) {
+      if (rowEmpty && element is DataColumn2 && element.emptyWidth != null) {
+        maxWidth = element.emptyWidth ?? maxWidth;
+      } else {
+        if (element.label is Text) {
+          var text = element.label as Text;
+          var r = _textSize(text.data.toString(), style);
+
+          if (r.width > maxWidth) {
+            maxWidth = r.width + 40;
+          }
         }
       }
     });
@@ -630,6 +642,14 @@ class DataTable2 extends DataTable {
 
       var widths = List<double>.generate(length, (i) {
         var w = columnWidth;
+
+        if (!rowsExist) {
+          DataColumn column = columns[i];
+          if (column is DataColumn2 && column.emptyWidth != null) {
+            w = column.emptyWidth ?? w;
+          }
+        }
+
         // if (rowsExist) {
         w = _getRowsWidth(
             columns, rows, i, columnWidth, customTableStyle ?? TextStyle());
