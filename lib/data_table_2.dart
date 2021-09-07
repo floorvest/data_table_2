@@ -443,8 +443,10 @@ class DataTable2 extends DataTable {
     }
 
     currentColumns.forEach((element) {
-      if (rowEmpty && element is DataColumn2 && element.emptyWidth != null) {
-        maxWidth = element.emptyWidth ?? maxWidth;
+      if (rowEmpty) {
+        if (element is DataColumn2 && element.emptyWidth != null) {
+          maxWidth = element.emptyWidth ?? maxWidth;
+        }
       } else {
         if (element.label is Text) {
           var text = element.label as Text;
@@ -651,8 +653,7 @@ class DataTable2 extends DataTable {
         }
 
         // if (rowsExist) {
-        w = _getRowsWidth(
-            columns, rows, i, columnWidth, customTableStyle ?? TextStyle());
+        w = _getRowsWidth(columns, rows, i, w, customTableStyle ?? TextStyle());
         // }
         // var column = columns[i];
         // if (column is DataColumn2) {
