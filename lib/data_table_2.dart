@@ -454,6 +454,13 @@ class DataTable2 extends DataTable {
         if (r.width > maxWidth) {
           maxWidth = r.width + 40;
         }
+      } else if (element.label is SelectableText) {
+        var text = element.label as SelectableText;
+        var r = _textSize(text.data.toString(), style);
+
+        if (r.width > maxWidth) {
+          maxWidth = r.width + 40;
+        }
       }
     }
 
